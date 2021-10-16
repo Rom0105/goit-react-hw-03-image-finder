@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { error } from '@pnotify/core/dist/PNotify.js';
 import '@pnotify/core/dist/BrightTheme.css';
 import 'react-toastify/dist/ReactToastify.css';
+import Spinner from '../Spinner/Spinner';
 import Searchbar from '../Searchbar/Searchbar';
 import ImageGallery from '../ImageGallery/ImageGallery';
 import Modal from '../Modal/Modal';
@@ -111,7 +112,7 @@ class App extends Component {
       return (
         <>
           <Searchbar onSubmit={this.handleFormSubmit} />
-          {/* <Spinner /> */}
+          <Spinner />
           <ImageGallery images={images} selectedImage={this.handleSelectedImage} />
 
           {images.length > 0 && <Loader onClick={this.loadMoreBtnClick} />}
