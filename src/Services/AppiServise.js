@@ -1,12 +1,13 @@
 import axios from 'axios';
-import { BASE_URL, API_KEY } from '../Services/Constants';
 
-axios.defaults.baseURL = BASE_URL;
+const API_KEY = '23040897-f684e552d269990a649c2a9ea';
 
-async function pixHandler(searchQuery, page) {
-  const url = `/?image_type=photo&orientation=horizontal&q=${searchQuery}&page=${page}&per_page=12&key=${API_KEY}`;
-  const { data } = await axios.get(url);
-  return data.hits;
-}
+const searchApi = ({ query = '', page = 1 }) => {
+  return axios
+    .get(
+      `https://pixabay.com/api/?q=${query}&page=${page}&key=${API_KEY}&image_type=photo&orientation=horizontal&per_page=12`,
+    )
+    .then(({ data }) => data.hits);
+};
 
-export default pixHandler;
+export default searchApi;

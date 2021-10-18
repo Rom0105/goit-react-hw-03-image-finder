@@ -1,19 +1,18 @@
-import style from '../Loader/Loader.module.css';
 import React from 'react';
-import PropTypes from 'prop-types';
+import Loader from 'react-loader-spinner';
+import style from '../Loader/Loader.module.css';
 
-const Loader = ({ onClick }) => {
+function loader() {
   return (
-    <div className={style.div}>
-      <button type="button" onClick={onClick} className={style.button}>
-        Load more
-      </button>
-    </div>
+    <Loader
+      type="Puff"
+      color="#00BFFF"
+      height={200}
+      width={200}
+      timeout={3000}
+      className={style.Loader}
+    />
   );
-};
+}
 
-Loader.propTypes = {
-  onClick: PropTypes.func,
-};
-
-export default Loader;
+export default loader;

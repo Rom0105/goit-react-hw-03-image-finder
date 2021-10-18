@@ -3,142 +3,117 @@ import PropTypes from 'prop-types';
 import { error } from '@pnotify/core/dist/PNotify.js';
 import '@pnotify/core/dist/BrightTheme.css';
 import 'react-toastify/dist/ReactToastify.css';
-import Spinner from '../Spinner/Spinner';
+import style from '../App/App.module.css';
+import Loader from '../Loader/Loader';
 import Searchbar from '../Searchbar/Searchbar';
 import ImageGallery from '../ImageGallery/ImageGallery';
 import Modal from '../Modal/Modal';
-import pixHandler from '../../Services/AppiServise';
-import Loader from '../Loader/Loader';
+import searchApi from '../../Services/AppiServise';
 import Button from '../Button/Button';
 
 class App extends Component {
-  static propTypes = {
-    searchQuery: PropTypes.string,
-  };
-
   state = {
-    searchQuery: '',
     page: 1,
-    images: [],
-    selectedImg: null,
-    alt: null,
-    status: 'idle',
+    pictures: [],
+    query: '',
+    largeImage: '',
+    imgTags: '',
+    error: '',
+    showModal: false,
+    isLoading: false,
   };
 
-  async componentDidUpdate(_, prevState) {
-    const prevSearch = prevState.searchQuery;
-    const nextSearch = this.state.searchQuery;
+  componentDidUpdate(prevProps, prevState) {
+    if (prevState.query !== this.state.query) {
+      this.fetchPictures();
+    }
+    if (this.state.page !== 2 && prevState.page !== this.state.page) {
+      window.scrollTo({
+        top: document.documentElement.scrollHeight,
+        behavior: 'smooth',
+      });
+    }
+  }
 
-    const prevPage = prevState.page;
-    const nextPage = this.state.page;
+  toggleModal = () => {
+    this.setState(state => ({
+      showModal: !state.showModal,
+    }));
+  };
 
-    if (prevSearch !== nextSearch || prevPage !== nextPage) {
-      this.setState({ status: 'pending' });
+  bigImage = (largeImage = '') => {
+    this.setState({ largeImage });
 
-      try {
-        const images = await pixHandler(nextSearch, nextPage);
+    this.toggleModal();
+  };
 
-        if (!images.length) {
+  fetchPictures = () => {
+    const { page, query } = this.state;
+
+    const options = {
+      page,
+      query,
+    };
+
+    this.setState({ isLoading: true });
+
+    searchApi(options)
+      .then(pictures => {
+        if (!pictures.length) {
           error({
             text: 'No image!',
             delay: 1000,
           });
         }
-
         this.setState(prevState => ({
-          images: [...prevState.images, ...images],
-          status: 'resolved',
+          pictures: [...prevState.pictures, ...pictures],
+          page: prevState.page + 1,
         }));
-      } catch (error) {
+      })
+      .catch(error =>
         error({
           text: 'No image!',
           delay: 1000,
-        });
-
-        this.setState({ status: 'rejected' });
-      }
-
-      this.state.page > 1 && Button();
-    }
-  }
-
-  handleFormSubmit = searchQuery => {
-    if (this.state.searchQuery === searchQuery) {
-      return;
-    }
-
-    this.resetState();
-    this.setState({ searchQuery });
+        }),
+      )
+      .finally(() => this.setState({ isLoading: false }));
   };
 
-  loadMoreBtnClick = () => {
-    this.setState(prevState => ({
-      page: prevState.page + 1,
-    }));
-  };
-
-  handleSelectedImage = (largeImageUrl, tags) => {
-    this.setState({
-      selectedImg: largeImageUrl,
-      alt: tags,
-    });
-  };
-
-  closeModal = () => {
-    this.setState({
-      selectedImg: null,
-    });
-  };
-
-  resetState = () => {
-    this.setState({
-      searchQuery: '',
-      page: 1,
-      images: [],
-      selectedImg: null,
-      alt: null,
-      status: 'idle',
-    });
+  onChangeQwery = query => {
+    this.setState({ query: query, page: 1, pictures: [], error: null });
   };
 
   render() {
-    const { images, selectedImg, alt, status } = this.state;
+    const { pictures, isLoading, error, showModal, largeImage, imgTags } = this.state;
 
-    if (status === 'idle') {
-      return <Searchbar onSubmit={this.handleFormSubmit} />;
-    }
+    return (
+      <div className={style.AppStyle}>
+        <Searchbar onSubmit={this.onChangeQwery} />
 
-    if (status === 'pending') {
-      return (
-        <>
-          <Searchbar onSubmit={this.handleFormSubmit} />
-          <Spinner />
-          <ImageGallery images={images} selectedImage={this.handleSelectedImage} />
+        {error && <h1>{error}</h1>}
 
-          {images.length > 0 && <Loader onClick={this.loadMoreBtnClick} />}
-        </>
-      );
-    }
-
-    if (status === 'resolved') {
-      return (
-        <>
-          <Searchbar onSubmit={this.handleFormSubmit} />
-          <ImageGallery images={images} selectedImage={this.handleSelectedImage} />
-          {selectedImg && <Modal selectedImg={selectedImg} tags={alt} onClose={this.closeModal} />}
-          {images.length > 0 && <Loader onClick={this.loadMoreBtnClick} />}
-        </>
-      );
-    }
-
-    if (status === 'rejected') {
-      return (
-        <>
-          <Searchbar onSubmit={this.handleFormSubmit} />
-        </>
-      );
-    }
+        <ImageGallery images={pictures} selectedImage={this.bigImage} />
+        {isLoading && <Loader />}
+        {pictures.length > 11 && !isLoading && <Button onClick={this.fetchPictures} />}
+        {showModal && (
+          <Modal showModal={this.bigImage}>
+            <img src={largeImage} alt={imgTags} />
+          </Modal>
+        )}
+      </div>
+    );
   }
 }
+
+App.propTypes = {
+  pictures: PropTypes.array,
+  page: PropTypes.number,
+  query: PropTypes.string,
+  largeImage: PropTypes.string,
+  imgTags: PropTypes.string,
+  error: PropTypes.string,
+  showModal: PropTypes.bool,
+  isLoading: PropTypes.bool,
+};
 
 export default App;

@@ -6,17 +6,17 @@ import style from '../Searchbar/Searchbar.module.css';
 
 export default class Searchbar extends Component {
   state = {
-    searchQuery: '',
+    query: '',
   };
 
-  handleSearhChang = event => {
-    this.setState({ searchQuery: event.currentTarget.value.toLowerCase() });
+  handleChange = event => {
+    this.setState({ query: event.currentTarget.value.toLowerCase() });
   };
 
   handleSubmit = event => {
     event.preventDefault();
 
-    if (this.state.searchQuery.trim() === '') {
+    if (this.state.query.trim() === '') {
       alert({
         text: 'Enter the title!',
         delay: 1000,
@@ -24,8 +24,8 @@ export default class Searchbar extends Component {
 
       return;
     }
-    this.props.onSubmit(this.state.searchQuery);
-    this.setState({ searchQuery: '' });
+    this.props.onSubmit(this.state.query);
+    this.setState({ query: '' });
   };
 
   render() {
@@ -42,8 +42,8 @@ export default class Searchbar extends Component {
             autoComplete="off"
             autoFocus
             placeholder="Search images and photos"
-            value={this.state.searchQuery}
-            onChange={this.handleSearhChang}
+            value={this.state.query}
+            onChange={this.handleChange}
           />
         </form>
       </header>
@@ -52,5 +52,5 @@ export default class Searchbar extends Component {
 }
 
 Searchbar.propTypes = {
-  onSubmit: PropTypes.func,
+  query: PropTypes.string,
 };

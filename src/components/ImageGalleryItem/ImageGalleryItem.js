@@ -2,21 +2,22 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import style from '../ImageGalleryItem/ImageGalleryItem.module.css';
 
-export default function ImageGalleryItem({ tags, webformatURL, selectedImage }) {
+const ImageGalleryItem = ({ image, onClick, tags }) => {
   return (
     <li className={style.ImageGalleryItem}>
-      <img
-        src={webformatURL}
-        alt={tags}
-        onClick={selectedImage}
-        className={style.ImageGalleryItemImage}
-      />
+      <img src={image} alt={tags} onClick={onClick} className={style.ImageGalleryItemImage} />
     </li>
   );
-}
+};
+
+ImageGalleryItem.defaultProps = {
+  tags: '',
+};
 
 ImageGalleryItem.propTypes = {
-  tags: PropTypes.string.isRequired,
-  webformatURL: PropTypes.string.isRequired,
-  selectedImage: PropTypes.func,
+  tags: PropTypes.string,
+  image: PropTypes.string,
+  onClick: PropTypes.func,
 };
+
+export default ImageGalleryItem;
